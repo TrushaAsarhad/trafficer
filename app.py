@@ -23,14 +23,19 @@ hour = st.slider("Hour of the Day (0-23):", 0, 23)
 is_holiday = st.selectbox("Is it a holiday? (0=No, 1=Yes):", [0, 1])
 
 # Prepare input for prediction
-input_features = np.array([hour, day_of_week, is_holiday, 0]).reshape(1, -1)  # Replace '0' with a placeholder for Vehicles
+# Assuming 'hour', 'day_of_week', 'is_holiday', and a placeholder for 'Vehicles'
+# These represent the features for one timestep
+input_features = [hour, day_of_week, is_holiday, 0]
 
-# Scale only the relevant feature (Vehicles)
-vehicles_scaled = scaler.transform([[0]])[0][0]  # Placeholder scaling for Vehicles
-input_features[:, 3] = vehicles_scaled  # Replace the placeholder with the scaled value
+# Create a sequence of timesteps (24 timesteps required for prediction)
+# For simplicity, repeat the same input features 24 times (this is a placeholder logic; adapt for real use)
+sequence = np.array([input_features] * 24).reshape(1, 24, 4)  # Shape: (1, 24, 4)
+
+# Scale the 'Vehicles' feature for each timestep in the sequence
+sequence[:, :, 3] = scaler.transform(sequence[:, :, 3].reshape(-1, 1)).reshape(1, 24)  # Scale 'Vehicles'
 
 # Make prediction
 if st.button("Predict Traffic"):
-    prediction_scaled = model.predict(input_features)
+    prediction_scaled = model.predict(sequence)
     prediction = scaler.inverse_transform([[prediction_scaled[0][0]]])[0][0]  # Unscale the prediction
     st.write(f"Predicted Traffic Flow: **{int(prediction)} vehicles**")
